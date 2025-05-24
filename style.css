@@ -1,0 +1,26 @@
+.hero {
+      background: url('images/background.jpg') center/cover no-repeat;
+      color: white;
+      padding: 100px 20px;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: 3em;
+      font-weight: bold;
+    }
+    .hero p {
+      font-size: 1.2em;
+      max-width: 600px;
+      margin: auto;
+    }
+    .hero .btn {
+      margin-top: 20px;
+    }
+    .card-img-top {
+      height: 180px;
+      object-fit: cover;
+    }
+    .footer-logo {
+      font-size: 2rem;
+      font-weight: bold;
+    }

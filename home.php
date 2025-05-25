@@ -29,23 +29,30 @@
   </div>
 </nav>
 
-<!-- Hero -->
+<!-- Hero Section -->
 <header class="hero">
-  <h1>RESEP MASAKAN</h1>
-  <p>MbokQ hadirkan resep-resep praktis dan bergizi, tepat sebagai masakan sehari-hari.</p>
-  <a href="#resep-terbaru" class="btn btn-light">Lihat Resepnya</a>
+  <div class="hero-content">
+    <h1>RESEP MASAKAN</h1>
+    <p>
+      Inilah tempatnya segala resep masakan enak!<br>
+      MbokQ telah siapkan beragam hidangan seru bergaya rumahan, tepat sebagai masakan sehari-hari.
+    </p>
+    <a href="#resep-terbaru" class="btn btn-success px-4 py-2 mt-3">Lihat Selengkapnya</a>
+  </div>
 </header>
 
 <!-- Resep Terbaru -->
 <section class="py-5 bg-light" id="resep-terbaru">
   <div class="container">
     <h2 class="text-center mb-4">Resep Terbaru</h2>
-    <div class="row g-4">
+    <div class="row g-4" id="resep-list">
       <?php
       $result = mysqli_query($conn, "SELECT * FROM resep ORDER BY id_resep DESC");
+      $index = 0;
       while($row = mysqli_fetch_assoc($result)):
+        $hiddenClass = $index >= 6 ? 'd-none' : ''; // Sembunyikan jika lebih dari 6
       ?>
-        <div class="col-md-4">
+        <div class="col-md-4 resep-item <?php echo $hiddenClass; ?>">
           <div class="card h-100">
             <img src="uploads/<?php echo $row['gambar']; ?>" class="card-img-top" alt="<?php echo $row['nama_resep']; ?>">
             <div class="card-body">
@@ -54,17 +61,42 @@
             </div>
           </div>
         </div>
-      <?php endwhile; ?>
+      <?php
+        $index++;
+      endwhile;
+      ?>
     </div>
+    
+    <?php if ($index > 5): ?>
+      <div class="text-center mt-4">
+        <button id="loadMoreBtn" class="btn btn-success">Lihat Lebih Banyak</button>
+      </div>
+    <?php endif; ?>
   </div>
 </section>
+
+<script>
+  // JavaScript untuk tombol "Lihat Lebih Banyak"
+  document.addEventListener('DOMContentLoaded', function () {
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+    const items = document.querySelectorAll('.resep-item.d-none');
+    let isExpanded = false;
+    
+    if (loadMoreBtn) {
+      loadMoreBtn.addEventListener('click', function () {
+        items.forEach(item => item.classList.remove('d-none'));
+        loadMoreBtn.style.display = 'none';
+      });
+    }
+  });
+</script>
 
 <!-- Footer -->
 <footer class="bg-success text-white pt-5 pb-3 mt-5">
   <div class="container">
     <div class="row text-center text-md-start">
       <div class="col-md-4 mb-4">
-        <div class="footer-logo">RESEP MBOKQ</div>
+        <div class="footer-logo fw-bold fs-5">RESEP MBOKQ</div>
         <p>Temukan resep praktis untuk keluarga Anda setiap hari.</p>
       </div>
       <div class="col-md-2 mb-3">

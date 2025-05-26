@@ -156,7 +156,7 @@
             
             <div class="form-group">
                 <label for="biaya">Biaya</label>
-                <input type="etext" name="biaya" id="biaya" required>
+                <input type="text" name="biaya" id="biaya" required>
             </div>
             
             <div class="form-group">

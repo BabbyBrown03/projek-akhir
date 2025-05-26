@@ -145,10 +145,10 @@
             </div>
             
             <div class="form-group">
-                <input type="text" name="biaya" id="biaya" required>
+                <label for="bahan">Bahan-bahan</label>
+                <textarea name="bahan" id="bahan" required></textarea>
             </div>
-            
-            <div class="form-group">
+        
             <div class="form-group">
                 <label for="langkah">Langkah Kerja</label>
                 <textarea name="langkah" id="langkah" required></textarea>

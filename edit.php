@@ -111,7 +111,7 @@
             if(empty($errors)) {
                 $gambarBaru = $_FILES['gambar']['name'];
                 $tmpGambar = $_FILES['gambar']['tmp_name'];
-                $gambarLama = $row['gambar'];
+                $gambarLama = $_FILES['gambar'];
 
                 if ($gambarBaru) {
                     if (!is_dir('uploads')) {

@@ -1,135 +1,114 @@
+<?php
+include_once("config.php");
+
+$search = '';
+if (isset($_GET['search'])) {
+    $search = mysqli_real_escape_string($conn, $_GET['search']);
+}
+
+// Pagination
+$limit = 5; // jumlah data per halaman
+$halaman = isset($_GET['halaman']) ? (int)$_GET['halaman'] : 1;
+$offset = ($halaman - 1) * $limit;
+
+if (!empty($search)) {
+    $query = "SELECT * FROM resep WHERE nama_resep LIKE '%$search%' ORDER BY nama_resep ASC LIMIT $offset, $limit";
+    $countQuery = "SELECT COUNT(*) FROM resep WHERE nama_resep LIKE '%$search%'";
+} else {
+    $query = "SELECT * FROM resep ORDER BY nama_resep ASC LIMIT $offset, $limit";
+    $countQuery = "SELECT COUNT(*) FROM resep";
+}
+
+$result = mysqli_query($conn, $query);
+$total_result = mysqli_query($conn, $countQuery);
+$row_total = mysqli_fetch_row($total_result);
+$total_data = $row_total[0];
+$total_halaman = ceil($total_data / $limit);
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Resep</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #333;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        th {
-            background-color: #f2f2f2;
-            font-weight: bold;
-        }
-        tr:hover {
-            background-color: #f5f5f5;
-        }
-        .btn {
-            display: inline-block;
-            padding: 8px 12px;
-            background-color: #4CAF50;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
-            transition: background-color 0.3s;
-        }
-        .btn:hover {
-            background-color: #45a049;
-        }
-        .btn-edit {
-            background-color: #2196F3;
-        }
-        .btn-edit:hover {
-            background-color: #0b7dda;
-        }
-        .btn-delete {
-            background-color: #f44336;
-        }
-        .btn-delete:hover {
-            background-color: #da190b;
-        }
-        .header-action {
-            margin-bottom: 20px;
-        }
-        .overflow {
-            overflow: auto;
-            text-overflow: ellipsis;
-        }
-    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-    <div class="container">
-        <h1>Data Resep Masakan</h1>
-        
-        <div class="header-action">
-            <a href="tambah.php" class="btn">Tambah Resep</a>
-        </div>
-        
-        <table>
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th>Id resep</th>
-                    <th>Nama resep</th>
-                    <th>Bahan-bahan</th>
-                    <th>Langkah Kerja</th>
-                    <th>Biaya</th>
-                    <th>Aksi</th>
-                </tr>
+<body class="bg-light py-4">
+<div class="container bg-white p-4 rounded shadow">
+    <?php if (isset($_SESSION['message'])): ?>
+    <div class="alert alert-success">
+        <?php echo $_SESSION['message']; unset($_SESSION['message']); ?>
+    </div>
+    <?php endif; ?>
+
+    <?php if (isset($_SESSION['error'])): ?>
+    <div class="alert alert-danger">
+        <?php echo $_SESSION['error']; unset($_SESSION['error']); ?>
+    </div>
+    <?php endif; ?>
+    <h1 class="text-center mb-4">Data Resep Masakan</h1>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+        <a href="tambah.php" class="btn btn-success">Tambah Resep</a>
+        <form method="get" action="" class="d-flex gap-2">
+            <input type="text" name="search" class="form-control" placeholder="Cari resep..." value="<?= htmlspecialchars($search) ?>">
+            <button type="submit" class="btn btn-primary">Cari</button>
+        </form>
+        <a href="logout.php" class="btn btn-danger">Logout</a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="table-light">
+            <tr>
+                <th>No</th>
+                <th>ID Resep</th>
+                <th>Nama Resep</th>
+                <th>Bahan-bahan</th>
+                <th>Langkah Kerja</th>
+                <th>Biaya</th>
+                <th>Aksi</th>
+            </tr>
             </thead>
             <tbody>
-                <?php
-                // Include file koneksi database
-                include_once("config.php");
-                
-                // Query untuk mengambil data resep
-                $result = mysqli_query($conn, "SELECT * FROM resep ORDER BY nama_resep ASC");
-                
-                // Cek apakah ada data
-                if (mysqli_num_rows($result) > 0) {
-                    $no = 1;
-                    // Looping untuk menampilkan data
-                    while($row = mysqli_fetch_assoc($result)) {
-                        echo "<tr>";
-                        echo "<td>".$no++."</td>";
-                        echo "<td>".$row['id_resep']."</td>";
-                        echo "<td>".$row['nama_resep']."</td>";
-                        echo "<td>".$row['bahan']."</td>";
-                        echo "<td class='overflow'>".$row['langkah']."</td>";
-                        echo "<td>".$row['biaya']."</td>";
-                        echo "<td>";
-                        echo "<a href='edit.php?id=".$row['id_resep']."' class='btn btn-edit'>Edit</a> ";
-                        echo "<a href='hapus.php?id=".$row['id_resep']."' class='btn btn-delete' onclick='return confirm(\"Yakin ingin menghapus data?\")'>Hapus</a>";
-                        echo "</td>";
-                        echo "</tr>";
-                    }
-                } else {
-                    echo "<tr><td colspan='7' style='text-align:center'>Tidak ada data</td></tr>";
+            <?php
+            if (mysqli_num_rows($result) > 0) {
+                $no = $offset + 1;
+                while ($row = mysqli_fetch_assoc($result)) {
+                    echo "<tr>";
+                    echo "<td>".$no++."</td>";
+                    echo "<td>".$row['id_resep']."</td>";
+                    echo "<td>".$row['nama_resep']."</td>";
+                    echo "<td>".$row['bahan']."</td>";
+                    echo "<td>".$row['langkah']."</td>";
+                    echo "<td>".$row['biaya']."</td>";
+                    echo "<td>
+                            <div class='d-flex flex-wrap gap-2'>
+                                <a href='edit.php?id=".$row['id_resep']."' class='btn btn-warning btn-sm'>Edit</a>
+                                <a href='hapus.php?id=".$row['id_resep']."' class='btn btn-danger btn-sm' onclick='return confirm(\"Yakin ingin menghapus data?\")'>Hapus</a>
+                            </div>
+                          </td>";
+                    echo "</tr>";
                 }
-                
-                // Tutup koneksi
-                mysqli_close($conn);
-                ?>
+            } else {
+                echo "<tr><td colspan='7' class='text-center'>Tidak ada data ditemukan.</td></tr>";
+            }
+            ?>
             </tbody>
         </table>
     </div>
+
+    <?php if ($total_halaman > 1): ?>
+    <nav class="mt-3">
+        <ul class="pagination justify-content-center">
+            <?php for ($i = 1; $i <= $total_halaman; $i++): ?>
+                <li class="page-item <?= ($halaman == $i) ? 'active' : '' ?>">
+                    <a class="page-link" href="?halaman=<?= $i ?>&search=<?= urlencode($search) ?>"><?= $i ?></a>
+                </li>
+            <?php endfor; ?>
+        </ul>
+    </nav>
+    <?php endif; ?>
+</div>
 </body>
 </html>

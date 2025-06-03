@@ -1,6 +1,12 @@
 <?php
 include_once("config.php");
 
+// Batasi akses hanya untuk username 'admin'
+if (!isset($_SESSION['username']) || $_SESSION['username'] !== 'admin') {
+    echo "<div class='container mt-5'><h4>Akses ditolak. Halaman ini hanya bisa diakses oleh admin.</h4></div>";
+    exit;
+}
+
 $search = '';
 if (isset($_GET['search'])) {
     $search = mysqli_real_escape_string($conn, $_GET['search']);
